@@ -119,7 +119,7 @@ export default function Home() {
               </div>
               <div className="p-6 min-h-32 flex flex-col justify-center">
                 <p className="text-gray-300 text-lg mb-4 italic">
-                  "You uploaded 47 pages and you're asking me why you got a C? That's the problem — you didn't actually <strong>understand</strong> the material. Let me help you fix that."
+                  &ldquo;You uploaded 47 pages and you&apos;re asking me why you got a C? That&apos;s the problem — you didn&apos;t actually <strong>understand</strong> the material. Let me help you fix that.&rdquo;
                 </p>
                 <p className="text-red-400/70 text-sm">→ Switching to source-grounded tutor mode...</p>
               </div>
@@ -201,7 +201,7 @@ export default function Home() {
           >
             <h2 className="text-3xl md:text-4xl font-black mb-4">Ready to Transform Your Study?</h2>
             <p className="text-gray-400 mb-8 text-lg">
-              Join thousands of students who are studying smarter with AG's AI-powered system.
+              Join thousands of students who are studying smarter with AG&apos;s AI-powered system.
             </p>
             <Link href="/dashboard">
               <motion.button

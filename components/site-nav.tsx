@@ -8,6 +8,11 @@ import { Menu, X, Brain } from 'lucide-react'
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Uploads', href: '/uploads' },
+  { label: 'Predictor', href: '/exam-predictor' },
+  { label: 'Tutor', href: '/tutor' },
+  { label: 'Flashcards', href: '/flashcards' },
+  { label: 'Quiz', href: '/quiz' },
   { label: 'Settings', href: '/settings' },
 ]
 

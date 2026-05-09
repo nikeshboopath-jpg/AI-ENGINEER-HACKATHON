@@ -5,9 +5,21 @@ A focused study assistant built with Next.js, TypeScript, Tailwind CSS, Framer M
 ## Features
 
 - Dark futuristic UI with red glowing accents
-- Landing page and dashboard ready for core study workflows
-- Upload section, exam prediction summary, and AG tutor briefing
-- Minimal structure for easy local setup and extension
+- Full frontend and backend integration with API routes
+- Uploads, exam predictions, tutor chat, flashcards, and quiz generation
+- OpenAI-backed responses with fallback mock data when no key is configured
+- Simple local data store for uploaded documents and generated content
+
+## Pages included
+
+- `/` — Landing page
+- `/dashboard` — Dashboard overview
+- `/uploads` — Document upload center
+- `/exam-predictor` — Topic prediction view
+- `/tutor` — Angry Professor chat interface
+- `/flashcards` — Generated study cards
+- `/quiz` — Auto-generated practice quiz
+- `/settings` — App preferences
 
 ## Run locally
 

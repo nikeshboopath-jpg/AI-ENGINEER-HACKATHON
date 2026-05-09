@@ -1,11 +1,30 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ShieldCheck, Settings, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
 export default function SettingsPage() {
+  const [apiStatus, setApiStatus] = useState('Checking backend...')
+  const [model, setModel] = useState('Not loaded')
+
+  useEffect(() => {
+    async function loadHealth() {
+      try {
+        const res = await fetch('/api/health')
+        const data = await res.json()
+        setApiStatus(data.meta?.mode === 'openai' ? 'Live OpenAI mode' : 'Mock mode until OPENAI_API_KEY is added')
+        setModel(data.meta?.model || 'Not configured')
+      } catch {
+        setApiStatus('Backend not reachable')
+      }
+    }
+
+    loadHealth()
+  }, [])
+
   return (
     <div className="page-shell">
       <div className="max-w-5xl mx-auto space-y-10">
@@ -62,6 +81,10 @@ export default function SettingsPage() {
 
         <Card className="glass-panel p-8">
           <h2 className="text-2xl font-semibold text-white">Quick Links</h2>
+          <div className="mt-4 rounded-3xl border border-white/10 bg-black/30 p-5 text-sm text-slate-300">
+            <p><span className="font-semibold text-white">Backend:</span> {apiStatus}</p>
+            <p className="mt-2"><span className="font-semibold text-white">Model:</span> {model}</p>
+          </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <Link href="/dashboard">
               <Button className="w-full">Back to Dashboard</Button>
