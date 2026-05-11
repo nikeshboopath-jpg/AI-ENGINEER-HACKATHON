@@ -6,11 +6,29 @@ import { ShieldCheck, Settings, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
+type ProfessorDifficulty = 'strict' | 'military' | 'brutal'
+
+const difficultyOptions: Array<{
+  value: ProfessorDifficulty
+  title: string
+  description: string
+}> = [
+  { value: 'strict', title: 'Level 1', description: 'Level 1 Proffessor' },
+  { value: 'military', title: 'Level 2', description: 'Lv2 Professor' },
+  { value: 'brutal', title: 'Level 3', description: 'Lv3  Final Boss' }
+]
+
 export default function SettingsPage() {
   const [apiStatus, setApiStatus] = useState('Checking backend...')
   const [model, setModel] = useState('Not loaded')
+  const [difficulty, setDifficulty] = useState<ProfessorDifficulty>('strict')
 
   useEffect(() => {
+    const savedDifficulty = window.localStorage.getItem('ag-professor-difficulty')
+    if (savedDifficulty === 'strict' || savedDifficulty === 'military' || savedDifficulty === 'brutal') {
+      setDifficulty(savedDifficulty)
+    }
+
     async function loadHealth() {
       try {
         const res = await fetch('/api/health')
@@ -24,6 +42,11 @@ export default function SettingsPage() {
 
     loadHealth()
   }, [])
+
+  function updateDifficulty(value: ProfessorDifficulty) {
+    setDifficulty(value)
+    window.localStorage.setItem('ag-professor-difficulty', value)
+  }
 
   return (
     <div className="page-shell">
@@ -69,12 +92,29 @@ export default function SettingsPage() {
               <Sparkles className="h-6 w-6 text-red-400" />
             </div>
             <p className="mt-4 text-slate-300 leading-7">
-              Pick between fast mock mode or a stricter study workflow. This simple page stands in for the full AG tutor configuration interface.
+              Pick how hard AG pushes during tutor sessions. Your choice is saved in this browser and applied when you ask the Angry Professor a question.
             </p>
-            <div className="mt-6 text-sm text-gray-400 space-y-2">
-              <p>• Level 1: strict teacher</p>
-              <p>• Level 2: military coach</p>
-              <p>• Level 3: brutally honest mentor</p>
+            <div className="mt-6 grid gap-3" role="radiogroup" aria-label="Angry Professor difficulty">
+              {difficultyOptions.map((option) => {
+                const selected = difficulty === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => updateDifficulty(option.value)}
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                      selected
+                        ? 'border-red-400 bg-red-500/15 text-white shadow-glow'
+                        : 'border-white/10 bg-black/30 text-slate-300 hover:border-red-400/60 hover:bg-red-500/10'
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold">{option.title}</span>
+                    <span className="mt-1 block text-xs text-gray-400">{option.description}</span>
+                  </button>
+                )
+              })}
             </div>
           </Card>
         </div>

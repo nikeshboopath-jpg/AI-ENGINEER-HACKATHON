@@ -32,10 +32,13 @@ export type QuizQuestion = {
   type: 'MCQ' | 'Short Answer' | 'Prediction'
 }
 
+export type ProfessorDifficulty = 'strict' | 'military' | 'brutal'
+
 export type ApiMeta = {
   mode: 'openai' | 'mock'
   model: string
   message?: string
+  difficulty?: ProfessorDifficulty
 }
 
 const store = {

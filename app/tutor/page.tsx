@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MessageSquare, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -11,11 +11,28 @@ type ChatEntry = {
   citation?: string
 }
 
+type ProfessorDifficulty = 'strict' | 'military' | 'brutal'
+
+const difficultyLabels: Record<ProfessorDifficulty, string> = {
+  strict: 'Level 1: strict teacher',
+  military: 'Level 2: military coach',
+  brutal: 'Level 3: brutally honest mentor'
+}
+
 export default function TutorPage() {
   const [question, setQuestion] = useState('')
   const [chat, setChat] = useState<ChatEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('Ask a question after uploading study material.')
+  const [difficulty, setDifficulty] = useState<ProfessorDifficulty>('strict')
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('ag-professor-difficulty')
+    if (saved === 'strict' || saved === 'military' || saved === 'brutal') {
+      setDifficulty(saved)
+      setStatus(`Angry Professor difficulty: ${difficultyLabels[saved]}.`)
+    }
+  }, [])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -30,13 +47,13 @@ export default function TutorPage() {
       const res = await fetch('/api/tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: sentText })
+        body: JSON.stringify({ question: sentText, difficulty })
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Tutor request failed.')
       setChat((prev) => [...prev, { role: 'assistant', text: data.answer || 'I could not answer that.', citation: data.citation }])
-      setStatus(data.meta?.message || `Using ${data.meta?.mode || 'backend'} mode.`)
+      setStatus(`${data.meta?.message || `Using ${data.meta?.mode || 'backend'} mode.`} Difficulty: ${difficultyLabels[data.meta?.difficulty as ProfessorDifficulty] || difficultyLabels[difficulty]}.`)
     } catch (error) {
       setChat((prev) => [...prev, { role: 'assistant', text: error instanceof Error ? error.message : 'Tutor request failed.' }])
       setStatus('Tutor request failed.')

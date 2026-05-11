@@ -2,6 +2,7 @@ import OpenAI from 'openai'
 import {
   ApiMeta,
   Flashcard,
+  ProfessorDifficulty,
   QuizQuestion,
   TopicPrediction,
   UploadedDoc,
@@ -18,6 +19,12 @@ type AiResult<T> = {
 type TutorResult = {
   answer: string
   citation?: string
+}
+
+const PROFESSOR_STYLES: Record<ProfessorDifficulty, string> = {
+  strict: 'Level 1 strict teacher: firm, clear, and corrective without being harsh.',
+  military: 'Level 2 military coach: intense, concise, drill-sergeant energy, and focused on discipline.',
+  brutal: 'Level 3 brutally honest mentor: blunt, demanding, and direct while staying useful and non-abusive.'
 }
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini'
@@ -255,27 +262,28 @@ export async function generateQuiz(): Promise<AiResult<QuizQuestion[]>> {
   return { data: store.quiz, meta: getApiMeta('Generated from uploaded study material.') }
 }
 
-export async function tutorRespond(message: string): Promise<AiResult<TutorResult>> {
+export async function tutorRespond(message: string, difficulty: ProfessorDifficulty = 'strict'): Promise<AiResult<TutorResult>> {
   const store = getStore()
+  const professorStyle = PROFESSOR_STYLES[difficulty] || PROFESSOR_STYLES.strict
   const fallback = {
     answer: store.docs.length
-      ? 'I need your OpenAI API key before I can reason over those uploads. For now, your materials are saved and ready.'
-      : "I don't have enough uploaded material to answer that confidently.",
+      ? `${professorStyle} I need your OpenAI API key before I can reason over those uploads. For now, your materials are saved and ready.`
+      : `${professorStyle} I don't have enough uploaded material to answer that confidently.`,
     citation: store.docs[0]?.name ? `Source: ${store.docs[0].name}` : undefined
   }
 
   const client = getClient()
   if (!client || !hasUsableDocs()) {
+    const metaMessage = !client ? 'Add OPENAI_API_KEY to enable the live tutor.' : 'Upload readable study text so AG can cite it.'
     return {
       data: fallback,
-      meta: getApiMeta(!client ? 'Add OPENAI_API_KEY to enable the live tutor.' : 'Upload readable study text so AG can cite it.')
+      meta: { ...getApiMeta(metaMessage), difficulty }
     }
   }
 
   const response = await client.responses.create({
     model: DEFAULT_MODEL,
-    instructions:
-      "You are AG, a strict, motivating academic tutor. Answer only from the provided study sources. If the sources do not support an answer, say you don't have enough uploaded material. Cite the source name you used.",
+    instructions: `You are AG, a motivating academic tutor. Use this Angry Professor difficulty: ${professorStyle} Answer only from the provided study sources. If the sources do not support an answer, say you don't have enough uploaded material. Cite the source name you used.`,
     input: `Study sources:\n${docsContext()}\n\nStudent question: ${message}`,
     temperature: 0.45,
     max_output_tokens: 700
@@ -286,7 +294,7 @@ export async function tutorRespond(message: string): Promise<AiResult<TutorResul
       answer: response.output_text?.trim() || fallback.answer,
       citation: store.docs[0]?.name ? `Source: ${store.docs[0].name}` : undefined
     },
-    meta: getApiMeta('Answered from uploaded study material.')
+    meta: { ...getApiMeta('Answered from uploaded study material.'), difficulty }
   }
 }
 
